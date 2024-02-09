@@ -1,3 +1,9 @@
 body {
-    font-family: 'Oswald', sans-serif !important;
-  }
+  font-family: "Oswald", sans-serif !important;
+}
+.right-section {
+  gap: 10%;
+}
+.left-section {
+    gap: 10%;
+}
