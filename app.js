@@ -24,7 +24,7 @@ const addTask = (task) => {
     try {
         return `<div class="p-3 mx-4 pt-0" id=${task.id}>
         <div class="d-flex bg-white rounded form-control form-control-lg">
-          <div class="p-2 flex-grow-1 d-flex" style="gap: 2%">
+          <div class="p-2 flex-grow-1 d-flex checkbox-task-area">
             <div class="checkBox">
               <input
                 type="checkbox"
