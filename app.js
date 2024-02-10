@@ -1,5 +1,5 @@
-const tasks = [];
-
+let tasks = [];
+let trashIcons = [];
 document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("task-deadline").value = getCurrentDate();
     document.getElementById("task-deadline").min = getCurrentDate();
@@ -25,16 +25,17 @@ const addTask = (task) => {
         return `<div class="p-3 mx-4 pt-0" id=${task.id}>
         <div class="d-flex bg-white rounded form-control form-control-lg">
           <div class="p-2 flex-grow-1 d-flex checkbox-task-area">
-            <div class="checkBox">
+            <div class="check-box">
               <input
                 type="checkbox"
                 id="${task.id}"
+                ${task.isCompleted ? "checked" : ''}
               />
             </div>
-            <div id="task">${task.taskName}</div>
+            <div id="task" class=${task.isCompleted ? "text-decoration-line-through" : ''}>${task.taskName}</div>
           </div>
           <div class="p-2" id="deadline">${task.deadLine}</div>
-          <div class="p-2" id=${task.id}>
+          <div class="p-2 pe-auto trash" id=${task.id}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="18"
@@ -64,6 +65,61 @@ const isValidDate = (currDate, selectedDate) => {
     return selected >= currentDate;
 }
 
+function sortTasksByDate(tasks) {
+    const clonedTasks = tasks.map(task => {
+        const [day, month, year] = task.deadLine.split('-');
+        return { ...task, deadLine: new Date(`${year}-${month}-${day}`) };
+    });
+    const sortedTasks = clonedTasks.sort((a, b) => a.deadLine - b.deadLine);
+    const formattedTasks = sortedTasks.map(task => {
+        const day = task.deadLine.getDate().toString().padStart(2, '0');
+        const month = (task.deadLine.getMonth() + 1).toString().padStart(2, '0'); // months are zero-based
+        const year = task.deadLine.getFullYear().toString().slice(-2);
+        return { ...task, deadLine: `${day}-${month}-${year}` };
+    });
+    return formattedTasks;
+}
+
+const renderTasks = (tasks) => {
+    tasks = sortTasksByDate(tasks);
+    const taskContainer = document.getElementById('task-container');
+    taskContainer.innerHTML = '';
+    tasks.forEach((x) => {
+        console.log('1');
+        taskContainer.innerHTML += addTask(x);
+    })
+    addClickEventToTrashIcons();
+    addClickEventToCheckBoxes();
+}
+
+const addClickEventToTrashIcons = () => {
+    const trashIcons = [...document.getElementsByClassName('trash')];
+    trashIcons.forEach(trashIcon => {
+        trashIcon.addEventListener('click', event => {
+            const itemId = event.currentTarget.id;
+            // const elementToBeDeleted = document.getElementById(itemId);
+            tasks = tasks.filter(x => x.id !== Number(itemId));
+            renderTasks(tasks);
+        });
+    });
+}
+
+const addClickEventToCheckBoxes = () => {
+    const checkBoxes = [...document.getElementsByClassName('check-box')];
+    checkBoxes.forEach(checkBox => {
+        checkBox.addEventListener('click', event => {
+            const itemId = event.target.id;
+            const isChecked = event.target.checked;
+            tasks.forEach((task) => {
+                if (itemId == task.id) {
+                    task.isCompleted = isChecked;
+                    renderTasks(tasks);
+                }
+            })
+        });
+    });
+}
+
 document.getElementById("task-input-box").addEventListener("keydown", function (event) {
     const text = document.getElementById("task-input-box").value?.trim();
     const selectedDate = document.getElementById("task-deadline").value;
@@ -73,7 +129,19 @@ document.getElementById("task-input-box").addEventListener("keydown", function (
         const task = { id: generateRandomId(), isCompleted: false, taskName: text, deadLine: convertDateFormat(selectedDate) };
         tasks.push(task);
         console.log(tasks);
-        const taskContainer = document.getElementById('task-container');
-        taskContainer.innerHTML += addTask(task);
+        renderTasks(tasks);
+        document.getElementById("task-input-box").value = "";
     }
 });
+
+document.getElementById("all").addEventListener("click",function(event) {
+    renderTasks(tasks);
+})
+document.getElementById("completed").addEventListener("click",function(event) {
+    const completedTasks =  tasks.filter(x => x.isCompleted)
+    renderTasks(completedTasks);
+})
+document.getElementById("incomplete").addEventListener("click",function(event) {
+    const incompleteTasks =  tasks.filter(x => !x.isCompleted)
+    renderTasks(incompleteTasks);
+})

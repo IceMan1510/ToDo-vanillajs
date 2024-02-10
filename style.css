@@ -10,3 +10,6 @@ body {
 .checkbox-task-area{
     gap: 2%;
 }
+.trash{
+    cursor: pointer;
+}
