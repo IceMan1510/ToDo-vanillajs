@@ -13,3 +13,6 @@ body {
 .trash{
     cursor: pointer;
 }
+.bottom-container{
+  gap: 1%;
+}
